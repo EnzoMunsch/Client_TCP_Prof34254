@@ -11,6 +11,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 val junitVersion = "5.12.1"
@@ -40,6 +41,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.1")
     implementation("com.google.code.gson:gson:2.14.0")
+    implementation("com.github.MoserBTS:totp:1.0.3")
 }
 
 tasks.named<JavaCompile>("compileTestJava") {

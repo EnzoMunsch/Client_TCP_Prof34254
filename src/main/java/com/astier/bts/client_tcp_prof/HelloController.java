@@ -1,21 +1,23 @@
 package com.astier.bts.client_tcp_prof;
 
+import com.astier.bts.totp.Totp;
 import com.astier.bts.client_tcp_prof.exceptions.DiagnosticException;
 import com.astier.bts.client_tcp_prof.modeles.Ipv4;
 import com.astier.bts.client_tcp_prof.multicast_diffusion.MulticastDiffusion;
 import com.astier.bts.client_tcp_prof.outils.ScanInterfaces;
 import com.astier.bts.client_tcp_prof.tcp.TCPClient;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.shape.Circle;
 
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Scanner;
+
+import static java.lang.Integer.parseInt;
 import static javafx.scene.paint.Color.*;
 
 public class HelloController implements Initializable {
@@ -33,10 +35,14 @@ public class HelloController implements Initializable {
     String adresse,port;
     static MulticastDiffusion multicastDiffusion;
     static String interfaceName;
+    private final String CODE = "ZPJMQKNMQXNCOEFNNEF";
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         try {
+            verifierTotp();
             getInterfaces();
 
             connecter.setOnMouseClicked(e -> this.connecter());
@@ -67,6 +73,43 @@ public class HelloController implements Initializable {
         voyant.setFill(RED);
         connecter.setDisable(false);
         deconnecter.setDisable(true);
+
+    }
+
+//    private void authenticator() throws Exception {
+//        Totp totp = new Totp(CODE);
+//        int code = 0;
+//        Thread.sleep(1000);
+//        TextAreaReponses.appendText("Entrez le code TOTP pour utiliser le client : ");
+//        do {
+//            button.setOnMouseClicked(_ -> TextAreaReponses.appendText(TextFieldRequette.getText()));
+//            if (!totp.testCodeTOTP(parseInt(TextFieldRequette.getText()))) {
+//                System.out.println("Here");
+//                TextAreaReponses.appendText("Code incorrect, veuillez reessayer :");
+//            }
+//            else {
+//                TextAreaReponses.appendText("Code bon.");
+//                System.out.println("here2");
+//            }
+//        } while (!totp.testCodeTOTP(parseInt(TextFieldRequette.getText())));
+//
+//    }
+
+    public boolean verifierTotp() throws Exception {
+        Totp totp = new Totp(CODE);
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Vérification TOTP");
+        dialog.setHeaderText("Saisissez votre code d'authentification.");
+        dialog.setContentText("Code TOTP :");
+
+        while (true) {
+            Optional<String> saisie = dialog.showAndWait();
+            if (saisie.isEmpty()) return false;
+            if (totp.testCodeTOTP(parseInt(saisie.get()))) return true;
+
+            dialog.setHeaderText("Code invalide. Réessayez.");
+            dialog.getEditor().clear();
+        }
     }
 
     private void getInterfaces() {
@@ -125,7 +168,7 @@ public class HelloController implements Initializable {
         port = TextFieldPort.getText();
 
         try {
-            tcp = new TCPClient(InetAddress.getByName(adresse), Integer.parseInt(port), this); // Initialisation
+            tcp = new TCPClient(InetAddress.getByName(adresse), parseInt(port), this); // Initialisation
         } catch (Exception e) {
             DiagnosticException.afficheException(e);
         }

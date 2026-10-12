@@ -5,6 +5,7 @@ module com.astier.bts.client_tcp_prof {
     requires java.net.http;
     requires jdk.jshell;
     requires com.google.gson;
+    requires totp.main;
 
 
     opens com.astier.bts.client_tcp_prof to javafx.fxml;
